@@ -1,0 +1,35 @@
+{
+	"version": "2.0.0",
+	"tasks": [
+		{
+			"type": "shell",
+			"label": "g++ build active file",
+			"command": "/usr/bin/g++",
+			"args": [
+				"-Wall", // show all warnings
+				"-g", // debug infos
+				"-std=c++17",
+				// "${file}", // compile only active file
+				"${workspaceFolder}/*.cpp", // compile all *.cpp files
+				"-pthread", // allow usage of asio
+				"-I",
+				"/home/filippo/Documents/Coding/Sdk/asio-1.18.0/include/",
+				"-o",
+				"${fileDirname}/${fileBasenameNoExtension}"
+			],
+			"options": {
+				"cwd": "/usr/bin"
+			},
+			"problemMatcher": [
+				"$gcc"
+			],
+			"group": {
+				"kind": "build",
+				"isDefault": true
+			},
+			"presentation": {
+				"clear": true // clear console before build
+			}
+		}
+	]
+}

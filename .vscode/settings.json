@@ -1,0 +1,13 @@
+{
+    "files.associations": {
+        "random": "cpp",
+        "algorithm": "cpp",
+        "queue": "cpp"
+    },
+    "editor.formatOnSave": true,
+    "files.autoSave": "afterDelay",
+    "files.autoSaveDelay": 1000,
+    "files.insertFinalNewline": true,
+    "files.trimTrailingWhitespace": true,
+    "files.trimFinalNewlines": true
+}
