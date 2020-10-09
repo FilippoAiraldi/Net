@@ -6,16 +6,20 @@
 			"label": "g++ build active file",
 			"command": "/usr/bin/g++",
 			"args": [
+				// options
 				"-Wall", // show all warnings
-				"-g", // debug infos
-				"-std=c++17",
-				// "${file}", // compile only active file
-				"${workspaceFolder}/*.cpp", // compile all *.cpp files
+				// "-v", // verbose info
+				"-g", // debuggable
+				"-std=c++17", // c++ standard version
 				"-pthread", // allow usage of asio
-				"-I",
-				"/home/filippo/Documents/Coding/Sdk/asio-1.18.0/include/",
+				// to compile
+				"${workspaceFolder}/*.cpp",
+				// include
+				"-I/home/filippo/Documents/Coding/Sdk/asio-1.18.0/include/",
+				"-I${workspaceFolder}/NetCommon/",
+				// output
 				"-o",
-				"${fileDirname}/${fileBasenameNoExtension}"
+				"${workspaceFolder}/bin/output"
 			],
 			"options": {
 				"cwd": "/usr/bin"
