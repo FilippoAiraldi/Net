@@ -3,19 +3,20 @@
 	"tasks": [
 		{
 			"type": "shell",
-			"label": "g++ build active file",
+			"label": "g++ build",
 			"command": "/usr/bin/g++",
 			"args": [
 				// options
-				"-Wall", // show all warnings
-				// "-v", // verbose info
-				"-g", // debuggable
-				"-std=c++17", // c++ standard version
-				"-pthread", // allow usage of asio
+				"-Wall",
+				// "-v",
+				"-g",
+				"-std=c++17",
+				"-pthread",
 				// to compile
 				"${workspaceFolder}/*.cpp",
 				// include
 				"-I/home/filippo/Documents/Coding/Sdk/asio-1.18.0/include/",
+				"-I/home/filippo/Documents/Coding/Sdk/Uuids/include/",
 				"-I${workspaceFolder}/NetCommon/",
 				// output
 				"-o",

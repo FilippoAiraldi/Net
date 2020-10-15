@@ -22,7 +22,7 @@
                     "ignoreFailures": true
                 }
             ],
-            "preLaunchTask": "g++ build active file", // same label as the building task (task.json)
+            "preLaunchTask": "g++ build", // same label as the building task (task.json)
             "miDebuggerPath": "/usr/bin/gdb"
         }
     ]

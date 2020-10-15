@@ -1,4 +1,5 @@
 #pragma once
+
 #include "net_common.h"
 #include "net_concurrent_queue.h"
 #include "net_message.h"
@@ -10,7 +11,7 @@ namespace net
     class client_interface
     {
     public:
-        client_interface() : m_socket(m_context) {}
+        client_interface() : socket(context) {}
         virtual ~client_interface() { disconnect(); }
 
     public:
@@ -19,18 +20,18 @@ namespace net
             try
             {
                 // create connection
-                m_connection = std::make_unique<connection<T>>(); // todo
+                this->connectionToServer = std::make_unique<connection<T>>(); // todo
 
                 // resolve hostname/ip-address into physical address
-                asio::ip::tcp::resolver resolver(m_context);
+                asio::ip::tcp::resolver resolver(this->context);
                 auto m_endpoints = resolver.resolve(host, std::to_string(port));
 
-                m_connection->connectToServer(); // todo
-                m_context_thread = std::thread([this]() { m_context.run(); });
+                this->connectionToServer->connectToServer(); // todo
+                this->contextThread = std::thread([this]() { this->context.run(); });
             }
             catch (const std::exception &e)
             {
-                std::cerr << e.what() << '\n';
+                std::cerr << "[CLIENT] Exception: " << e.what() << '\n';
                 throw e;
             }
 
@@ -40,33 +41,33 @@ namespace net
         void disconnect()
         {
             if (isConnected())
-                m_connection->disconnect();
+                this->connectionToServer->disconnect();
 
-            m_context.stop();
-            if (m_context_thread.joinable())
-                m_context_thread.join();
+            this->context.stop();
+            if (this->contextThread.joinable())
+                this->contextThread.join();
 
-            m_connection.release();
+            this->connectionToServer.release();
         }
 
         bool isConnected()
         {
-            if (m_connection)
-                return m_connection->isConnected();
+            if (this->connectionToServer)
+                return this->connectionToServer->isConnected();
             return false;
         }
 
         void send(const message<T> &msg) {}
 
-        concurrent_queue<owned_message<T>> &getIncomingMessages() { return m_q_in; }
+        concurrent_queue<owned_message<T>> &getIncomingMessages() { return this->msgsIn; }
 
     protected:
-        asio::io_context m_context;                  // handles data transfer
-        std::thread m_context_thread;                // thread for the asio context
-        asio::ip::tcp::socket m_socket;              // socket to server
-        std::unique_ptr<connection<T>> m_connection; // client instance of connection to server
+        asio::io_context context;                          // handles data transfer
+        std::thread contextThread;                         // thread for the asio context
+        asio::ip::tcp::socket socket;                      // socket to server
+        std::unique_ptr<connection<T>> connectionToServer; // client instance of connection to server
 
     private:
-        concurrent_queue<owned_message<T>> m_q_in; // incoming server msgs
+        concurrent_queue<owned_message<T>> msgsIn; // incoming server msgs
     };
 } // namespace net
