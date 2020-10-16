@@ -97,7 +97,37 @@ namespace net
 
         void sendMessageToAllClients(const message<T> &msg, std::shared_ptr<connection<T>> clientToIgnore = nullptr)
         {
-            
+            bool anyInvalidClients = false;
+
+            for (std::shared_ptr<connection<T>> &client : this->connections)
+            {
+                if (client && client->isConnected())
+                {
+                    if (client != clientToIgnore)
+                        client->send(msg);
+                }
+                else
+                {
+                    this->onClientDisconnected(client);
+                    client.reset();
+                    anyInvalidClients = true;
+                }
+            }
+
+            if (anyInvalidClients)
+                this->removeConnection(nullptr);
+        }
+
+        void Update(size_t maxMessages = -1)
+        {
+            size_t msgsCnt = 0;
+            while (msgsCnt < maxMessages && !this->msgsIn.empty())
+            {
+                owned_message<T> msg = this->msgsIn.pop_front();
+                this->onMessage(msg.remote, msg);
+
+                msgsCnt++;
+            }
         }
 
     protected:
@@ -115,9 +145,9 @@ namespace net
         }
 
     protected:
-        concurrent_queue<message<T>> msgsIn; // thread-safe incoming msgs queue
-        asio::io_context context;            // for running asio stuff
-        std::thread contextThread;           // required by the asio context
+        concurrent_queue<owned_message<T>> msgsIn; // thread-safe incoming msgs queue
+        asio::io_context context;                  // for running asio stuff
+        std::thread contextThread;                 // required by the asio context
 
         std::deque<std::shared_ptr<connection<T>>> connections; // deque of all client connections
 
