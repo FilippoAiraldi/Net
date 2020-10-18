@@ -5,15 +5,15 @@
     "version": "0.2.0",
     "configurations": [
         {
-            "name": "g++ - Build and debug active file",
+            "name": "g++ build and debug server",
             "type": "cppdbg",
             "request": "launch",
-            "program": "${workspaceFolder}/bin/output",
+            "program": "${workspaceFolder}/bin/SimpleServer.out",
             "args": [],
             "stopAtEntry": false,
             "cwd": "${workspaceFolder}",
             "environment": [],
-            "externalConsole": false,
+            "externalConsole": true,
             "MIMode": "gdb",
             "setupCommands": [
                 {
@@ -22,8 +22,85 @@
                     "ignoreFailures": true
                 }
             ],
-            "preLaunchTask": "g++ build", // same label as the building task (task.json)
+            "preLaunchTask": "g++ build server",
             "miDebuggerPath": "/usr/bin/gdb"
+        },
+        {
+            "name": "g++ build and debug client",
+            "type": "cppdbg",
+            "request": "launch",
+            "program": "${workspaceFolder}/bin/SimpleClient.out",
+            "args": [],
+            "stopAtEntry": false,
+            "cwd": "${workspaceFolder}",
+            "environment": [],
+            "externalConsole": true,
+            "MIMode": "gdb",
+            "setupCommands": [
+                {
+                    "description": "Enable pretty-printing for gdb",
+                    "text": "-enable-pretty-printing",
+                    "ignoreFailures": true
+                }
+            ],
+            "preLaunchTask": "g++ build client",
+            "miDebuggerPath": "/usr/bin/gdb"
+        },
+        {
+            "name": "g++ debug server",
+            "type": "cppdbg",
+            "request": "launch",
+            "program": "${workspaceFolder}/bin/SimpleServer.out",
+            "args": [],
+            "stopAtEntry": false,
+            "cwd": "${workspaceFolder}",
+            "environment": [],
+            "externalConsole": true,
+            "MIMode": "gdb",
+            "setupCommands": [
+                {
+                    "description": "Enable pretty-printing for gdb",
+                    "text": "-enable-pretty-printing",
+                    "ignoreFailures": true
+                }
+            ],
+            "miDebuggerPath": "/usr/bin/gdb"
+        },
+        {
+            "name": "g++ debug client",
+            "type": "cppdbg",
+            "request": "launch",
+            "program": "${workspaceFolder}/bin/SimpleClient.out",
+            "args": [],
+            "stopAtEntry": false,
+            "cwd": "${workspaceFolder}",
+            "environment": [],
+            "externalConsole": true,
+            "MIMode": "gdb",
+            "setupCommands": [
+                {
+                    "description": "Enable pretty-printing for gdb",
+                    "text": "-enable-pretty-printing",
+                    "ignoreFailures": true
+                }
+            ],
+            "miDebuggerPath": "/usr/bin/gdb"
+        }
+    ],
+    "compounds": [
+        {
+            "name": "g++ build and debug server and client",
+            "configurations": [
+                "g++ build and debug server",
+                "g++ build and debug client"
+            ]
+        },
+        {
+            "name": "g++ debug server and client",
+            "configurations": [
+                "g++ debug server",
+                "g++ debug client"
+            ]
         }
     ]
 }

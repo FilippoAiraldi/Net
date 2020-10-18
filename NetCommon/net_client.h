@@ -19,14 +19,18 @@ namespace net
         {
             try
             {
-                // create connection
-                this->connectionToServer = std::make_unique<connection<T>>(); // todo
-
-                // resolve hostname/ip-address into physical address
+                // resolve host name into physical address
                 asio::ip::tcp::resolver resolver(this->context);
-                auto m_endpoints = resolver.resolve(host, std::to_string(port));
+                asio::ip::tcp::resolver::results_type endpoints = resolver.resolve(host, std::to_string(port));
 
-                this->connectionToServer->connectToServer(); // todo
+                // create connection
+                this->connectionToServer = std::make_unique<connection<T>>(
+                    connection<T>::owner::client,
+                    this->context,
+                    asio::ip::tcp::socket(this->context),
+                    this->msgsIn);
+
+                this->connectionToServer->connectToServer(endpoints);
                 this->contextThread = std::thread([this]() { this->context.run(); });
             }
             catch (const std::exception &e)
@@ -57,7 +61,11 @@ namespace net
             return false;
         }
 
-        void send(const message<T> &msg) {}
+        void send(const message<T> &msg)
+        {
+            if (this->isConnected())
+                this->connectionToServer->send(msg);
+        }
 
         concurrent_queue<owned_message<T>> &getIncomingMessages() { return this->msgsIn; }
 

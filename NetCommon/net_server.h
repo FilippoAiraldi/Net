@@ -24,8 +24,8 @@ namespace net
         {
             try
             {
-                this->WaitForClientConnectionAsync();
-                this->context = std::thread([this]() { this->context.run(); });
+                this->waitForClientConnectionAsync();
+                this->contextThread = std::thread([this]() { this->context.run(); });
             }
             catch (const std::exception &e)
             {
@@ -44,41 +44,43 @@ namespace net
                 this->contextThread.join();
 
             std::cout << "[SERVER] Stopped.\n";
+            return true;
         }
 
         void waitForClientConnectionAsync()
         {
-            this->acceptor.async_accept([this](std::error_code ec, asio::ip::tcp::socket socket) {
-                if (!ec)
-                {
-                    std::cout << "[SERVER] New connection: " << socket.remote_endpoint() << "\n";
-
-                    std::shared_ptr<connect<T>> newConnection = std::make_shared<connection<T>>(
-                        connection<T>::owner::server,
-                        this->context,
-                        std::move(socket),
-                        this->msgsIn);
-
-                    if (this->onClientConnecting(newConnection))
+            this->acceptor.async_accept(
+                [this](std::error_code ec, asio::ip::tcp::socket socket) {
+                    if (!ec)
                     {
-                        this->connections.push_back(std::move(newConnection));
-                        this->connections.back()->connectToClient(this->idCounter++);
+                        const asio::ip::tcp::endpoint newEndpoint = socket.remote_endpoint();
 
-                        std::cout << "[SERVER] Connection " << socket.remote_endpoint()
-                                  << "approved with id: " << this->connections.back()->id() << ".\n";
+                        std::shared_ptr<connection<T>> newConnection = std::make_shared<connection<T>>(
+                            connection<T>::owner::server,
+                            this->context,
+                            std::move(socket),
+                            this->msgsIn);
+
+                        if (this->onClientConnecting(newConnection))
+                        {
+                            this->connections.push_back(std::move(newConnection));
+                            this->connections.back()->connectToThisClient(this->idCounter++);
+
+                            std::cout << "[SERVER] New connection " << newEndpoint
+                                      << " approved with id " << this->connections.back()->getId() << ".\n";
+                        }
+                        else
+                        {
+                            std::cout << "[SERVER] New connection " << newEndpoint << " denied.\n";
+                        }
                     }
                     else
                     {
-                        std::cout << "[SERVER] Connection " << socket.remote_endpoint() << "denied.\n";
+                        std::cerr << "[SERVER] New connection error: " << ec.message() << "\n";
                     }
-                }
-                else
-                {
-                    std::cerr << "[SERVER] New connection error: " << ec.message() << "\n";
-                }
 
-                this->waitForClientConnectionAsync();
-            });
+                    this->waitForClientConnectionAsync();
+                });
         }
 
         void sendMessage(std::shared_ptr<connection<T>> client, const message<T> &msg)
@@ -118,13 +120,16 @@ namespace net
                 this->removeConnection(nullptr);
         }
 
-        void Update(size_t maxMessages = -1)
+        void Update(size_t maxMessages = -1, bool wait = false)
         {
+            if (wait)
+                this->msgsIn.wait();
+
             size_t msgsCnt = 0;
             while (msgsCnt < maxMessages && !this->msgsIn.empty())
             {
                 owned_message<T> msg = this->msgsIn.pop_front();
-                this->onMessage(msg.remote, msg);
+                this->onMessage(msg.remote, msg.msg);
 
                 msgsCnt++;
             }

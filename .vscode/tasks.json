@@ -3,24 +3,18 @@
 	"tasks": [
 		{
 			"type": "shell",
-			"label": "g++ build",
+			"label": "g++ build server",
 			"command": "/usr/bin/g++",
 			"args": [
-				// options
 				"-Wall",
-				// "-v",
 				"-g",
 				"-std=c++17",
-				"-pthread",
-				// to compile
-				"${workspaceFolder}/*.cpp",
-				// include
+				"${workspaceFolder}/NetServer/SimpleServer.cpp",
 				"-I/home/filippo/Documents/Coding/Sdk/asio-1.18.0/include/",
-				"-I/home/filippo/Documents/Coding/Sdk/Uuids/include/",
 				"-I${workspaceFolder}/NetCommon/",
-				// output
 				"-o",
-				"${workspaceFolder}/bin/output"
+				"${workspaceFolder}/bin/SimpleServer.out",
+				"-pthread",
 			],
 			"options": {
 				"cwd": "/usr/bin"
@@ -28,13 +22,52 @@
 			"problemMatcher": [
 				"$gcc"
 			],
-			"group": {
-				"kind": "build",
-				"isDefault": true
-			},
+			"group": "build",
 			"presentation": {
-				"clear": true // clear console before build
-			}
+				"clear": true,
+				"panel": "dedicated"
+			},
+		},
+		{
+			"type": "shell",
+			"label": "g++ build client",
+			"command": "/usr/bin/g++",
+			"args": [
+				"-Wall",
+				"-g",
+				"-std=c++17",
+				"${workspaceFolder}/NetClient/SimpleClient.cpp",
+				"-I/home/filippo/Documents/Coding/Sdk/asio-1.18.0/include/",
+				"-I${workspaceFolder}/NetCommon/",
+				"-o",
+				"${workspaceFolder}/bin/SimpleClient.out",
+				"-pthread",
+				"-lX11", // just for some linux
+			],
+			"options": {
+				"cwd": "/usr/bin"
+			},
+			"problemMatcher": [
+				"$gcc"
+			],
+			"group": "build",
+			"presentation": {
+				"clear": true,
+				"panel": "dedicated"
+			},
+		},
+		{
+			"type": "shell",
+			"label": "g++ build server and client",
+			"group": "build",
+			"dependsOrder": "sequence",
+			"dependsOn": [
+				"g++ build client",
+				"g++ build server"
+			],
+			"problemMatcher": [
+				"$gcc"
+			]
 		}
 	]
 }

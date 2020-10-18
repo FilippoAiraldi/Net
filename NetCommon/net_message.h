@@ -4,6 +4,15 @@
 
 namespace net
 {
+    enum class msgType : uint32_t
+    {
+        ServerAccept,
+        ServerDeny,
+        ServerPing,
+        MessageAll,
+        ServerMessage,
+    };
+
     template <typename T>
     struct message_header
     {
@@ -22,24 +31,24 @@ namespace net
         std::vector<uint8_t> body;
 #endif
 
-        message()
-        {
-            this->header.size = this->size();
-        };
-
-        message(T id) : message()
-        {
-            this->header.id = id;
-        }
-
         size_t size() const
         {
-            return sizeof(message_header<T>) + body.size(); // Returns whole message size
+            return body.size();
+        }
+
+        void resizeBody(std::size_t sz)
+        {
+#ifdef QUEUE_MSGS_IMPLEMENTATION
+            // do nothing
+#else
+            this->body.resize(sz);
+#endif
         }
 
         friend std::ostream &operator<<(std::ostream &os, const message<T> &msg)
         {
-            os << msg.to_string();
+            os << "Message { Id = " << msg.header.id
+               << ", Size = " << msg.header.size << " }";
             return os;
         }
 
@@ -93,34 +102,24 @@ namespace net
             msg.header.size = msg.size();
             return msg;
         }
-
-        virtual std::string to_string() const
-        {
-            return "Message { Id = " +
-                   std::to_string(int(this->header.id)) + ", Size = " +
-                   std::to_string(this->header.size) + " }";
-        }
     };
 
     template <typename T>
     struct connection; // forward declaration
 
     template <typename T>
-    struct owned_message : message<T>
+    struct owned_message
     {
         std::shared_ptr<connection<T>> remote = nullptr;
+        message<T> msg;
 
-        owned_message() : message<T>() {}
-
-        owned_message(T id) : message<T>(id) {}
-
-        std::string to_string() const override
+        friend std::ostream &
+        operator<<(std::ostream &os, const owned_message<T> &owned_msg)
         {
-            std::ostringstream os;
-            os << "Message { Id = " << int(this->header.id)
-               << ", Size = " << this->header.size
-               << ", Remote = " << this->remote << " }";
-            return os.str();
+            os << "Message { Id = " << owned_msg.msg.header.id
+               << ", Size = " << owned_msg.msg.header.size
+               << ", Remote = " << *(owned_msg.remote.get()) << " }";
+            return os;
         }
     };
 } // namespace net
